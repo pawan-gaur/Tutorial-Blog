@@ -13,4 +13,14 @@
 			<add-attribute value="css/style.css" />
 		</put-list-attribute>
 	</definition>
+	
+	<definition name="blog.layout" template="/WEB-INF/views/tiles/layout/footer.jsp">
+		<put-list-attribute name="javascripts">
+			<add-attribute value="js/jquery.min.js" />
+		</put-list-attribute>
+		<put-list-attribute name="stylesheets">
+			<add-attribute value="css/bootstrap.css" />
+			<add-attribute value="css/style.css" />
+		</put-list-attribute>
+	</definition>
 </tiles-definitions>
