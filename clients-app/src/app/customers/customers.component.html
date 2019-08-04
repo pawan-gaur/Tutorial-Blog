@@ -28,9 +28,9 @@
       <tr *ngFor="let customer of customers">
         <td>{{customer.id}}</td>
         <td>{{customer.firstName}}</td>
-        <td>{{customer.lastName}}</td>
+        <td>{{ customer.lastName | uppercase }}</td>
         <td>{{customer.email}}</td>
-        <td>{{customer.createAt}}</td>
+        <td>{{customer.createAt | date:"EEEE dd, MMMM yyyy"}}</td>
         <td>
           <button type="button" name="button" [routerLink]="['/customers/form', customer.id]" class="btn btn-primary">
             Edit

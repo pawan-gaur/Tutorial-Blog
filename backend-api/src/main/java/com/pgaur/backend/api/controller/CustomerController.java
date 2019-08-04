@@ -6,11 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -32,8 +37,9 @@ public class CustomerController {
         try {
             customer = customerService.findById(id);
         } catch (DataAccessException e) {
-            response.put("message", "Error in querying database");
+
             response.put("error", e.getMessage().concat(" : ").concat(e.getMostSpecificCause().getMessage()));
+            response.put("message", "Error in querying database");
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -41,14 +47,29 @@ public class CustomerController {
             response.put("message", "Customer Id : ".concat(id.toString().concat(" not found in database")));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<Customer>(customer, HttpStatus.OK);
     }
 
     @PostMapping("/customers")
-    public ResponseEntity<?> create(@RequestBody Customer customer) {
+    public ResponseEntity<?> create(@Valid @RequestBody Customer customer, BindingResult result) {
         Customer newCustomer = null;
         Map<String, Object> response = new HashMap<>();
+
+        if (result.hasErrors()) {
+            /*List<String> errors = new ArrayList<>();
+
+            for (FieldError err : result.getFieldErrors()) {
+                errors.add("Field '" + err.getField() + "' " + err.getDefaultMessage());
+            }*/
+            List<String> errors = result.getFieldErrors()
+                    .stream()
+                    .map(err -> "Field '" + err.getField() + "' " + err.getDefaultMessage())
+                    .collect(Collectors.toList());
+
+            response.put("errors", errors);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+        }
+
         try {
             newCustomer = customerService.save(customer);
         } catch (DataAccessException e) {
@@ -56,16 +77,26 @@ public class CustomerController {
             response.put("error", e.getMessage().concat(" : ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        response.put("message", "Customer has been created successfully");
         response.put("customer", newCustomer);
+        response.put("message", "Customer has been created successfully");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/customers/{id}")
-    public ResponseEntity<?> update(@RequestBody Customer customer, @PathVariable Long id) {
+    public ResponseEntity<?> update(@Valid @RequestBody Customer customer, @PathVariable Long id, BindingResult result) {
         Customer updatedCustomer = null;
         Map<String, Object> response = new HashMap<>();
         Customer currentCustomer = customerService.findById(id);
+
+        if (result.hasErrors()) {
+            List<String> errors = result.getFieldErrors()
+                    .stream()
+                    .map(err -> "Field '" + err.getField() + "' " + err.getDefaultMessage())
+                    .collect(Collectors.toList());
+
+            response.put("errors", errors);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+        }
 
         if (customer == null) {
             response.put("message", "Error: could not be Updated, Customer Id : ".concat(id.toString().concat(" not found in database")));
@@ -84,10 +115,8 @@ public class CustomerController {
             response.put("error", e.getMessage().concat(" : ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        response.put("message", "Customer has been updated successfully");
         response.put("customer", updatedCustomer);
-
+        response.put("message", "Customer has been updated successfully");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
