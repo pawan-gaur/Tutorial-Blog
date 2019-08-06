@@ -30,14 +30,10 @@ public class Customer implements Serializable {
     @Column(nullable = false, unique = true)
     private String email;
 
+    //@NotEmpty(message = "field can't be empty")
     @Column(name = "created_at")
     @Temporal(TemporalType.DATE)
     private Date createAt;
-
-    @PrePersist
-    public void prePersist() {
-        createAt = new Date();
-    }
 
     public Long getId() {
         return id;

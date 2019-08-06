@@ -4,7 +4,7 @@ import {CUSTOMERS} from './customer.json';
 import {Customer} from './customer';
 import {of, Observable, throwError} from 'rxjs';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {map, catchError} from 'rxjs/operators';
+import {map, catchError, tap} from 'rxjs/operators';
 import swal from 'sweetalert2';
 import {Router} from '@angular/router';
 
@@ -19,18 +19,29 @@ export class CustomerService {
   constructor(private http: HttpClient, private router: Router) {
   }
 
-  getCustomers(): Observable<Customer[]> {
+  getCustomers(page: number): Observable<any> {
     // return of(CUSTOMERS);
-    return this.http.get<Customer[]>(this.urlEndPoint).pipe(
-      map(response => {
-        let customers = response as Customer[];
-        return customers.map(customer => {
+    return this.http.get<Customer[]>(this.urlEndPoint + '/page/' + page).pipe(
+      tap((response: any) => {
+        console.log('CustomerService: tap 1');
+        (response.content as Customer[]).forEach(customer => {
+          console.log(customer.firstName);
+        });
+      }),
+      map((response: any) => {
+        (response.content as Customer[]).map(customer => {
           customer.firstName = customer.firstName.toUpperCase();
-
-          let datePipe = new DatePipe('es');
+          // const datePipe = new DatePipe('es');
           // customer.createAt = datePipe.transform(customer.createAt, 'EEEE dd, MMMM yyyy');
           // customer.createAt = formatDate(customer.createAt, 'dd-MM-yyyy', 'en-US');
           return customer;
+        });
+        return response;
+      }),
+      tap(response => {
+        console.log('CustomerService: tap 2');
+        (response.content as Customer[]).forEach(customer => {
+          console.log(customer.firstName);
         });
       })
     );
