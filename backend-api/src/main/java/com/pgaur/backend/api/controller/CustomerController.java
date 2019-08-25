@@ -10,14 +10,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -134,6 +139,17 @@ public class CustomerController {
         Map<String, Object> response = new HashMap<>();
 
         try {
+            Customer customer = customerService.findById(id);
+            String previousPhotoName = customer.getPhoto();
+
+            if(previousPhotoName != null && previousPhotoName.length() > 0){
+                Path newPhotoName = Paths.get("uploads").resolve(previousPhotoName).toAbsolutePath();
+                File archievePhotoName = newPhotoName.toFile();
+                if(archievePhotoName.exists() && archievePhotoName.canRead()){
+                    archievePhotoName.delete();
+                }
+            }
+
             customerService.delete(id);
         } catch (DataAccessException e) {
             response.put("message", "Error remove the customer in the database");
@@ -141,6 +157,44 @@ public class CustomerController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         response.put("message", "Customer has been removed successfully");
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/customers/upload")
+    public ResponseEntity<?> upload(@RequestParam("archive") MultipartFile archive, @RequestParam("id") Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        Customer customer = customerService.findById(id);
+
+        if (!archive.isEmpty()) {
+            String firstNameArchive = UUID.randomUUID().toString() + "_" +archive.getOriginalFilename().replace(" ","");
+            Path routeArchieve = Paths.get("uploads").resolve(firstNameArchive).toAbsolutePath();
+
+            try {
+                Files.copy(archive.getInputStream(), routeArchieve);
+            } catch (IOException e) {
+                response.put("message", "Error uploading client image : " + firstNameArchive);
+                response.put("error", e.getMessage().concat(" : ").concat(e.getCause().getMessage()));
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            String previousPhotoName = customer.getPhoto();
+
+            if(previousPhotoName != null && previousPhotoName.length() > 0){
+                Path newPhotoName = Paths.get("uploads").resolve(previousPhotoName).toAbsolutePath();
+                File archievePhotoName = newPhotoName.toFile();
+                if(archievePhotoName.exists() && archievePhotoName.canRead()){
+                    archievePhotoName.delete();
+                }
+            }
+
+            customer.setPhoto(firstNameArchive);
+            customerService.save(customer);
+
+            response.put("customer", customer);
+            response.put("message", "You have successfully uploaded the image : " + firstNameArchive);
+        }
+
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 

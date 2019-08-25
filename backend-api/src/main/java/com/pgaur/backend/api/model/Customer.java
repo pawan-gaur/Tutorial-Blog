@@ -3,6 +3,7 @@ package com.pgaur.backend.api.model;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
@@ -30,10 +31,12 @@ public class Customer implements Serializable {
     @Column(nullable = false, unique = true)
     private String email;
 
-    //@NotEmpty(message = "field can't be empty")
+    @NotNull(message = "field can't be empty")
     @Column(name = "created_at")
     @Temporal(TemporalType.DATE)
     private Date createAt;
+
+    private String photo;
 
     public Long getId() {
         return id;
@@ -73,5 +76,13 @@ public class Customer implements Serializable {
 
     public void setCreateAt(Date createAt) {
         this.createAt = createAt;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 }
