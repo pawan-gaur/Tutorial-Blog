@@ -2,6 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {Customer} from './customer';
 import {CustomerService} from './customer.service';
 import swal from 'sweetalert2';
+import {tap} from 'rxjs/operators';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-customers',
@@ -10,17 +12,33 @@ import swal from 'sweetalert2';
 export class CustomersComponent implements OnInit {
 
   customers: Customer[];
+  pager: any;
 
-  constructor(private customerService: CustomerService) {
+  constructor(private customerService: CustomerService, private activatedRoute: ActivatedRoute) {
 
   }
 
   ngOnInit() {
-    this.customerService.getCustomers().subscribe(
-      (customers) => {
-        this.customers = customers;
+
+    this.activatedRoute.paramMap.subscribe(params => {
+      let page: number = +params.get('page');
+
+      if (!page) {
+        page = 0;
       }
-    );
+
+      this.customerService.getCustomers(page).pipe(
+        tap(response => {
+          console.log('CustomersComponent: tap 3');
+          (response.content as Customer[]).forEach(customer => {
+            console.log(customer.firstName);
+          });
+        })
+      ).subscribe(response => {
+        this.customers = response.content as Customer[];
+        this.pager = response;
+      });
+    });
   }
 
   delete(customer: Customer): void {
@@ -41,7 +59,7 @@ export class CustomersComponent implements OnInit {
       if (result.value) {
         this.customerService.delete(customer.id).subscribe(
           response => {
-            this.customers = this.customers.filter( cli => cli !== customer )
+            this.customers = this.customers.filter(cli => cli !== customer)
             swal.fire(
               'Customer Removed!',
               `Customer ${customer.firstName} successfully deleted.`,

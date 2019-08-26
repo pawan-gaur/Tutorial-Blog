@@ -1,6 +1,10 @@
 package com.pgaur.backend.api.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -14,22 +18,25 @@ public class Customer implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "field can't be empty")
+    @Size(min = 3, max = 12, message = "firstName has to be between 3 and 12")
     @Column(nullable = false)
     private String firstName;
 
+    @NotEmpty(message = "field can't be empty")
     private String lastName;
 
+    @NotEmpty(message = "field can't be empty")
+    @Email(message = "it is not a well formed email address")
     @Column(nullable = false, unique = true)
     private String email;
 
+    @NotNull(message = "field can't be empty")
     @Column(name = "created_at")
     @Temporal(TemporalType.DATE)
     private Date createAt;
 
-    @PrePersist
-    public void prePersist(){
-        createAt = new Date();
-    }
+    private String photo;
 
     public Long getId() {
         return id;
@@ -69,5 +76,13 @@ public class Customer implements Serializable {
 
     public void setCreateAt(Date createAt) {
         this.createAt = createAt;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 }
