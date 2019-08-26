@@ -17,6 +17,7 @@ import localeES from '@angular/common/locales/es';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatDatepickerModule} from '@angular/material';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
+import { DetailComponent } from './customers/detail/detail.component';
 
 registerLocaleData(localeES, 'es');
 
@@ -26,7 +27,8 @@ const routes: Routes = [
   {path: 'customers', component: CustomersComponent},
   {path: 'customers/page/:page', component: CustomersComponent},
   {path: 'customers/form', component: FormComponent},
-  {path: 'customers/form/:id', component: FormComponent}
+  {path: 'customers/form/:id', component: FormComponent},
+  {path: 'customers/ver/:id', component: DetailComponent}
 ];
 
 @NgModule({
@@ -37,7 +39,8 @@ const routes: Routes = [
     DirectiveComponent,
     CustomersComponent,
     FormComponent,
-    PaginatorComponent
+    PaginatorComponent,
+    DetailComponent
   ],
   imports: [
     BrowserModule,
