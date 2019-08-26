@@ -23,9 +23,9 @@ export class CustomerService {
     // return of(CUSTOMERS);
     return this.http.get<Customer[]>(this.urlEndPoint + '/page/' + page).pipe(
       tap((response: any) => {
-        console.log('CustomerService: tap 1');
+        //console.log('CustomerService: tap 1');
         (response.content as Customer[]).forEach(customer => {
-          console.log(customer.firstName);
+          //console.log(customer.firstName);
         });
       }),
       map((response: any) => {
@@ -39,9 +39,9 @@ export class CustomerService {
         return response;
       }),
       tap(response => {
-        console.log('CustomerService: tap 2');
+        //console.log('CustomerService: tap 2');
         (response.content as Customer[]).forEach(customer => {
-          console.log(customer.firstName);
+          //console.log(customer.firstName);
         });
       })
     );
@@ -96,4 +96,20 @@ export class CustomerService {
       })
     );
   }
+
+  uploadPhoto(archive: File, id): Observable<Customer>{
+    let formData = new FormData();
+    formData.append("archive", archive);
+    formData.append("id", id);
+    return this.http.post(`${this.urlEndPoint}/upload/`, formData).pipe(
+      map( (response: any) => response.customer as Customer),
+      catchError(e => {
+        this.router.navigate(['/customers']);
+        console.error(e.error.message);
+        swal.fire('error in removing customer', e.error.message, 'error');
+        return throwError(e);
+      })
+    );
+  }
+
 }

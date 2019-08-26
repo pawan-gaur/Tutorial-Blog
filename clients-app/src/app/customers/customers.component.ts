@@ -29,9 +29,9 @@ export class CustomersComponent implements OnInit {
 
       this.customerService.getCustomers(page).pipe(
         tap(response => {
-          console.log('CustomersComponent: tap 3');
+          //console.log('CustomersComponent: tap 3');
           (response.content as Customer[]).forEach(customer => {
-            console.log(customer.firstName);
+            //console.log(customer.firstName);
           });
         })
       ).subscribe(response => {
