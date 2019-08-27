@@ -18,11 +18,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatDatepickerModule} from '@angular/material';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import { DetailComponent } from './customers/detail/detail.component';
+import { HomeComponent } from './home/home.component';
 
 registerLocaleData(localeES, 'es');
 
 const routes: Routes = [
   {path: '', redirectTo: '/customers', pathMatch: 'full'},
+  {path: 'home', component: HomeComponent},
   {path: 'directive', component: DirectiveComponent},
   {path: 'customers', component: CustomersComponent},
   {path: 'customers/page/:page', component: CustomersComponent},
@@ -40,7 +42,8 @@ const routes: Routes = [
     CustomersComponent,
     FormComponent,
     PaginatorComponent,
-    DetailComponent
+    DetailComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
